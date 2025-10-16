@@ -1,60 +1,52 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Strahlenschutz-Rechner">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#FFD700">
-  <title>Strahlenschutz-Rechner (Offline-Version)</title>
-
-  <style>
-    :root {
-      --color-indigo: #4f46e5;
-      --color-indigo-dark: #3730a3;
-      --color-teal: #0d9488;
-      --color-teal-light: #e0f2f1;
-      --color-red-error: #dc2626;
-      --color-red-light: #fecaca;
-    }
-
-    html { font-size:18px; }
-    body { font-family:'Inter',sans-serif; margin:0; padding:0; background:#f7f9fc; }
-    #app { min-height:100vh; padding:1rem; box-sizing:border-box; }
-
-    .container { max-width:480px; margin:auto; padding:1rem; }
-    .card { background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.06); margin-bottom:1.5rem; }
-    .hidden { display:none; }
-
-    .subheader { font-size:1.25rem; font-weight:600; margin-bottom:1rem; color: var(--color-indigo-dark); }
-    .text-info { font-size:0.875rem; color:#4b5563; margin-bottom:1rem; min-height:2.5rem; }
-
-    .main-button { width:100%; padding:0.75rem; background-color: var(--color-indigo); color:white; font-weight:700; border-radius:0.5rem; transition:background-color 0.15s; box-shadow:0 4px 6px rgba(0,0,0,0.1); border:none; cursor:pointer; margin-top:1rem; }
-    .main-button:hover { background-color: var(--color-indigo-dark); }
-
-    .result-box { padding:1rem; border-radius:8px; background-color: var(--color-teal-light); color: var(--color-teal); font-weight:600; text-align:center; margin-top:1rem; border:2px solid var(--color-teal); }
-    .result-box.error { background-color: var(--color-red-light); border-color: var(--color-red-error); color: var(--color-red-error); }
-    .result-title { font-weight:700; font-size:1.125rem; }
-    .result-value { font-size:1.5rem; margin-top:0.25rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Strahlenschutz-Rechner (Offline-Version)</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app" class="container"></div>
+<div class="container">
+    <h1 class="header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 mr-3">
+            <circle cx="50" cy="50" r="50" fill="#FFC72C" />
+            <path fill="#000000" d="M50 50 L50 16 A34 34 0 0 1 84.7 33.7 L72.8 40.5 A22 22 0 0 0 50 28 Z" transform="rotate(0 50 50)"/>
+            <path fill="#000000" d="M50 50 L50 16 A34 34 0 0 1 84.7 33.7 L72.8 40.5 A22 22 0 0 0 50 28 Z" transform="rotate(120 50 50)"/>
+            <path fill="#000000" d="M50 50 L50 16 A34 34 0 0 1 84.7 33.7 L72.8 40.5 A22 22 0 0 0 50 28 Z" transform="rotate(240 50 50)"/>
+            <circle cx="50" cy="50" r="10" fill="#000000"/>
+        </svg>
+        Strahlenschutz-Rechner
+    </h1>
 
-  <!-- Service Worker Registrierung -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(reg => console.log('Service Worker registriert:', reg.scope))
-          .catch(err => console.error('Service Worker Fehler:', err));
-      });
-    }
-  </script>
+    <!-- Navigation -->
+    <div class="nav-bar">
+        <button id="nav-distanz" onclick="showScreen('distanz')" class="nav-button active">Abstand</button>
+        <button id="nav-einheit" onclick="showScreen('einheit')" class="nav-button">Einheiten</button>
+        <button id="nav-dauer" onclick="showScreen('dauer')" class="nav-button">Dauer</button>
+        <button id="nav-total-dose" onclick="showScreen('total-dose')" class="nav-button">Gesamtdosis</button>
+        <button id="nav-tkz" onclick="showScreen('tkz')" class="nav-button">TKZ/DL</button>
+        <button id="nav-aktivitaet" onclick="showScreen('aktivitaet')" class="nav-button">Aktivität</button>
+        <button id="nav-schutzwert" onclick="showScreen('schutzwert')" class="nav-button">Schutzwert</button>
+    </div>
 
-  <script src="app.js" defer></script>
+    <!-- Screens werden alle in app.js verwaltet -->
+    <div id="screens-container"></div>
+
+    <p class="text-center-sm">Alle Berechnungen sind Näherungen und dienen nur als Hilfsmittel.</p>
+</div>
+
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('Service Worker registriert'))
+    .catch(err => console.log('Service Worker Fehler:', err));
+}
+</script>
 </body>
 </html>
