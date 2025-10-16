@@ -1,3 +1,4 @@
+/* Verhindert Zoom beim Eingeben auf iOS/Android */
 input, select, textarea {
-    font-size: 16px; /* verhindert iOS Zoom bei Eingabe */
+    font-size: 16px; /* Kein Layout-Change, verhindert Zoom */
 }
