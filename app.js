@@ -21,56 +21,55 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   app.appendChild(navBar);
 
-  // === FORMULAR CARD 1 ===
-  const formCard1 = document.createElement("div");
-  formCard1.className = "card";
-  formCard1.innerHTML = `
-    <label class="form-label" for="input1">Dosisrate (kGy/h):</label>
-    <input type="number" id="input1" placeholder="Zahl eingeben">
-    <label class="form-label" for="input2">Zeit (h):</label>
-    <input type="number" id="input2" placeholder="Zahl eingeben">
-    <button class="main-button" id="calcBtn1">Berechnen</button>
-    <div class="result-box hidden" id="calcResult1">
-      <span class="result-title">Exposition:</span>
-      <span class="result-value">0</span>
-    </div>
-  `;
-  app.appendChild(formCard1);
+  // === Hilfsfunktion zur Erstellung von Formularen ===
+  function createFormCard(id, label1, label2, formulaFunc, unit) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <label class="form-label" for="${id}_input1">${label1}</label>
+      <input type="number" id="${id}_input1" placeholder="Zahl eingeben">
+      ${label2 ? `<label class="form-label" for="${id}_input2">${label2}</label>
+      <input type="number" id="${id}_input2" placeholder="Zahl eingeben">` : ""}
+      <button class="main-button" id="${id}_btn">Berechnen</button>
+      <div class="result-box hidden" id="${id}_result">
+        <span class="result-title">Ergebnis:</span>
+        <span class="result-value">0</span> ${unit}
+      </div>
+    `;
+    app.appendChild(card);
 
-  // === FORMULAR CARD 2 ===
-  const formCard2 = document.createElement("div");
-  formCard2.className = "card";
-  formCard2.innerHTML = `
-    <label class="form-label" for="input3">Schutzfaktor-Eingabe:</label>
-    <input type="number" id="input3" placeholder="Zahl eingeben">
-    <button class="main-button" id="calcBtn2">Berechnen 2</button>
-    <div class="result-box hidden" id="calcResult2">
-      <span class="result-title">Schutzfaktor:</span>
-      <span class="result-value">0</span>
-    </div>
-  `;
-  app.appendChild(formCard2);
+    const btn = document.getElementById(`${id}_btn`);
+    const resultBox = document.getElementById(`${id}_result`);
+    btn.addEventListener("click", () => {
+      resultBox.classList.remove("hidden");
+      const val1 = Number(document.getElementById(`${id}_input1`).value) || 0;
+      const val2 = label2 ? Number(document.getElementById(`${id}_input2`).value) || 0 : 0;
+      const result = formulaFunc(val1, val2);
+      resultBox.querySelector(".result-value").textContent = result.toFixed(2);
+    });
+  }
 
-  // === LOGIK FORM 1 ===
-  const calcBtn1 = document.getElementById("calcBtn1");
-  const calcResult1 = document.getElementById("calcResult1");
-  calcBtn1.addEventListener("click", () => {
-    calcResult1.classList.remove("hidden");
-    const val1 = Number(document.getElementById("input1").value) || 0;
-    const val2 = Number(document.getElementById("input2").value) || 0;
-    const exposure = val1 * val2; // Echte Berechnung Exposition
-    calcResult1.querySelector(".result-value").textContent = exposure.toFixed(2);
-  });
+  // === 7 Berechnungen ===
+  // 1. Exposition (Dosisrate * Zeit) -> µSv
+  createFormCard("calc1", "Dosisrate (µSv/h)", "Zeit (h)", (v1,v2) => v1*v2, "µSv");
 
-  // === LOGIK FORM 2 ===
-  const calcBtn2 = document.getElementById("calcBtn2");
-  const calcResult2 = document.getElementById("calcResult2");
-  calcBtn2.addEventListener("click", () => {
-    calcResult2.classList.remove("hidden");
-    const val3 = Number(document.getElementById("input3").value) || 0;
-    const shieldFactor = val3 * 0.8; // Beispielberechnung Schutz
-    calcResult2.querySelector(".result-value").textContent = shieldFactor.toFixed(2);
-  });
+  // 2. Umrechnung Sv zu µSv -> µSv
+  createFormCard("calc2", "Dosis (Sv)", null, v1 => v1*1e6, "µSv");
+
+  // 3. Umrechnung µSv zu Sv -> Sv
+  createFormCard("calc3", "Dosis (µSv)", null, v1 => v1/1e6, "Sv");
+
+  // 4. Schutzfaktor Berechnung -> µSv
+  createFormCard("calc4", "Dosis (µSv)", "Schutzfaktor", (v1,v2) => v1/v2, "µSv");
+
+  // 5. Kumulative Exposition -> µSv
+  createFormCard("calc5", "Dosisrate (µSv/h)", "Zeit (h)", (v1,v2) => v1*v2, "µSv");
+
+  // 6. Grenzwertvergleich -> µSv
+  createFormCard("calc6", "Gemessene Dosis (µSv)", "Grenzwert (µSv)", (v1,v2) => v1/v2, "µSv");
+
+  // 7. Reduzierte Dosis nach Abschirmung -> µSv
+  createFormCard("calc7", "Dosis (µSv)", "Abschirmung (Faktor)", (v1,v2) => v1/v2, "µSv");
 
   // === TEST BUTTON FÜR DEBUG ===
   const testBtn = document.createElement("button");
