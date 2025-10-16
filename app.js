@@ -1,16 +1,14 @@
 // --- HILFSFUNKTIONEN ---
-
-// Dezimalpunkt für Berechnung, Komma für Anzeige
 function formatToGerman(number, precision) {
     return number.toLocaleString('de-DE', { useGrouping: false, minimumFractionDigits: precision, maximumFractionDigits: precision });
 }
 
 function getInputValue(elementId) {
-    const el = document.getElementById(elementId);
-    let val = el.value || el.placeholder;
-    val = val.replace(',', '.');
-    const num = parseFloat(val);
-    return isNaN(num) ? NaN : num;
+    const element = document.getElementById(elementId);
+    let value = element.value || element.placeholder;
+    value = value.replace(',', '.'); 
+    const result = parseFloat(value);
+    return isNaN(result) ? NaN : result; 
 }
 
 // --- NAVIGATION ---
@@ -19,183 +17,245 @@ const screens = {
     'einheit': document.getElementById('screen-einheit'),
     'dauer': document.getElementById('screen-dauer'),
     'total-dose': document.getElementById('screen-total-dose'),
-    'tkz': document.getElementById('screen-tkz'),         
-    'aktivitaet': document.getElementById('screen-aktivitaet'), 
-    'schutzwert': document.getElementById('screen-schutzwert') 
+    'tkz': document.getElementById('screen-tkz'),
+    'aktivitaet': document.getElementById('screen-aktivitaet'),
+    'schutzwert': document.getElementById('screen-schutzwert')
 };
+
 const navButtons = {
     'distanz': document.getElementById('nav-distanz'),
     'einheit': document.getElementById('nav-einheit'),
     'dauer': document.getElementById('nav-dauer'),
     'total-dose': document.getElementById('nav-total-dose'),
-    'tkz': document.getElementById('nav-tkz'),             
-    'aktivitaet': document.getElementById('nav-aktivitaet'), 
-    'schutzwert': document.getElementById('nav-schutzwert') 
+    'tkz': document.getElementById('nav-tkz'),
+    'aktivitaet': document.getElementById('nav-aktivitaet'),
+    'schutzwert': document.getElementById('nav-schutzwert')
 };
 
 function showScreen(screenId) {
     for (const id in screens) {
-        if(screens[id]) screens[id].classList.toggle('hidden', id !== screenId);
-        if(navButtons[id]) navButtons[id].classList.toggle('active', id === screenId);
+        if (screens[id]) {
+            screens[id].classList.toggle('hidden', id !== screenId);
+        }
+        if (navButtons[id]) {
+            navButtons[id].classList.toggle('active', id === screenId);
+        }
     }
 }
 
-window.addEventListener('load', () => showScreen('distanz'));
+window.addEventListener('DOMContentLoaded', () => {
+    showScreen('distanz');
 
-// --- 1. Quadratisches Abstandsgesetz ---
+    // --- EVENTLISTENER FÜR BUTTONS ---
+    const calcMap = {
+        'distanz': calculateDistanz,
+        'einheit': calculateEinheit,
+        'dauer': calculateDauer,
+        'total-dose': calculateTotalDose,
+        'tkz': calculateTKZ,
+        'aktivitaet': calculateAktivitaet,
+        'schutzwert': calculateSchutzwert
+    };
+
+    for (const id in calcMap) {
+        const btn = document.getElementById('nav-' + id);
+        if (btn) {
+            btn.addEventListener('click', () => {
+                showScreen(id);
+            });
+        }
+    }
+
+    // --- BUTTONS IN DEN SCREENS ---
+    const screenButtons = {
+        'distanz': 'calculateDistanz',
+        'einheit': 'calculateEinheit',
+        'dauer': 'calculateDauer',
+        'total-dose': 'calculateTotalDose',
+        'tkz': 'calculateTKZ',
+        'aktivitaet': 'calculateAktivitaet',
+        'schutzwert': 'calculateSchutzwert'
+    };
+
+    for (const screenId in screenButtons) {
+        const btn = document.querySelector(`#screen-${screenId} .main-button`);
+        if (btn) {
+            btn.addEventListener('click', window[screenButtons[screenId]]);
+        }
+    }
+
+    // GammaH manuell toggle
+    const gammaSel = document.getElementById('dosisleistungskonstante-select');
+    if (gammaSel) gammaSel.addEventListener('change', toggleManualGammaH);
+});
+
+// --- BERECHNUNGSFUNKTIONEN ---
+
 function calculateDistanz() {
     const h1 = getInputValue('dosisleistung1');
     const r1 = getInputValue('abstand1');
     const r2 = getInputValue('abstand2');
     const resultBox = document.getElementById('result-distanz');
-    if (isNaN(h1) || isNaN(r1) || isNaN(r2) || h1<=0 || r1<=0 || r2<=0) {
-        resultBox.classList.remove('hidden'); resultBox.classList.add('error');
-        resultBox.innerHTML = 'Bitte alle Felder mit gültigen Werten (>0) ausfüllen.';
+
+    if (isNaN(h1) || isNaN(r1) || isNaN(r2) || h1 <= 0 || r1 <= 0 || r2 <= 0) {
+        resultBox.classList.remove('hidden');
+        resultBox.classList.add('error');
+        resultBox.innerHTML = 'Bitte alle Felder mit gültigen Werten (> 0) ausfüllen.';
         return;
     }
-    const h2 = h1 * (r1*r1)/(r2*r2);
+
+    const h2 = h1 * (r1 * r1) / (r2 * r2);
     resultBox.classList.remove('error');
-    resultBox.innerHTML = `<div class="result-title">Neue Dosisleistung (H2):</div>
-                           <div class="result-value">${formatToGerman(h2,3)} μSv/h</div>`;
+    resultBox.innerHTML = `<div class="result-title">Neue Dosisleistung (H2):</div><div class="result-value">${formatToGerman(h2,3)} μSv/h</div>`;
     resultBox.classList.remove('hidden');
 }
 
-// --- 2. Einheiten-Umrechner ---
 function calculateEinheit() {
     const wert = getInputValue('wert-einheit');
     const quelle = document.getElementById('einheit-quelle').value;
     const resultBox = document.getElementById('result-einheit');
-    if(isNaN(wert)){resultBox.classList.remove('hidden'); resultBox.classList.add('error'); resultBox.innerHTML='Bitte einen gültigen Wert eingeben.'; return;}
-    resultBox.classList.remove('error');
-    let micro;
-    switch(quelle){
-        case 'micro': micro = wert; break;
-        case 'milli': micro = wert*1000; break;
-        case 'sievert': micro = wert*1000000; break;
+
+    if (isNaN(wert)) {
+        resultBox.classList.remove('hidden');
+        resultBox.classList.add('error');
+        resultBox.innerHTML = 'Bitte einen gültigen Wert eingeben.';
+        return;
     }
-    resultBox.innerHTML = `<div class="result-title mb-2">Ergebnis (pro Stunde):</div>
-                           <p><strong>μSv:</strong> ${formatToGerman(micro,6)} μSv/h</p>
-                           <p><strong>mSv:</strong> ${formatToGerman(micro/1000,6)} mSv/h</p>
-                           <p><strong>Sv:</strong> ${formatToGerman(micro/1000000,9)} Sv/h</p>`;
+
+    let inMicroSvH;
+    switch (quelle) {
+        case 'micro': inMicroSvH = wert; break;
+        case 'milli': inMicroSvH = wert * 1000; break;
+        case 'sievert': inMicroSvH = wert * 1000000; break;
+        default: inMicroSvH = 0;
+    }
+
+    const milliSvH = inMicroSvH / 1000;
+    const svH = inMicroSvH / 1000000;
+
+    resultBox.classList.remove('error');
+    resultBox.innerHTML = `<div class="result-title mb-2">Ergebnis (alle in pro Stunde):</div>
+        <p><strong>μSv/h:</strong> ${formatToGerman(inMicroSvH,6)}</p>
+        <p><strong>mSv/h:</strong> ${formatToGerman(milliSvH,6)}</p>
+        <p><strong>Sv/h:</strong> ${formatToGerman(svH,9)}</p>`;
     resultBox.classList.remove('hidden');
 }
 
-// --- 3. Aufenthaltsdauer ---
 function calculateDauer() {
-    const dosis = getInputValue('dosisleistung-dauer');
-    const ziel = getInputValue('zieldosis-dauer');
-    const res = document.getElementById('result-dauer');
-    if(isNaN(dosis)||isNaN(ziel)||dosis<=0||ziel<=0){res.classList.remove('hidden'); res.classList.add('error'); res.innerHTML='Bitte alle Felder korrekt ausfüllen.'; return;}
-    const dauerStunden = ziel/dosis;
-    const stunden = Math.floor(dauerStunden);
-    const minutenGes = (dauerStunden-stunden)*60;
-    const minuten = Math.floor(minutenGes);
-    const sekunden = Math.round((minutenGes-minuten)*60);
-    res.classList.remove('error');
-    res.innerHTML = `<div class="result-title">Maximale Aufenthaltsdauer:</div>
-                     <div class="result-value">${formatToGerman(dauerStunden,2)} Stunden</div>
-                     <div style="font-size:0.875rem; margin-top:0.25rem;">(${stunden} Stunden, ${minuten} Minuten, ${sekunden} Sekunden)</div>`;
-    res.classList.remove('hidden');
+    const dosisleistung = getInputValue('dosisleistung-dauer');
+    const zieldosis = getInputValue('zieldosis-dauer');
+    const resultBox = document.getElementById('result-dauer');
+
+    if (isNaN(dosisleistung) || isNaN(zieldosis) || dosisleistung <= 0 || zieldosis <= 0) {
+        resultBox.classList.remove('hidden');
+        resultBox.classList.add('error');
+        resultBox.innerHTML = 'Bitte alle Felder mit gültigen Werten (> 0) ausfüllen.';
+        return;
+    }
+
+    const dauerInStunden = zieldosis / dosisleistung;
+    const stunden = Math.floor(dauerInStunden);
+    const minutenGesamt = (dauerInStunden - stunden) * 60;
+    const minuten = Math.floor(minutenGesamt);
+    const sekunden = Math.round((minutenGesamt - minuten) * 60);
+
+    const dauerFormatted = formatToGerman(dauerInStunden,2);
+
+    resultBox.classList.remove('error');
+    resultBox.innerHTML = `<div class="result-title">Maximale Aufenthaltsdauer:</div>
+        <div class="result-value">${dauerFormatted} Stunden</div>
+        <div style="font-size:0.875rem;">(${stunden}h ${minuten}min ${sekunden}s)</div>`;
+    resultBox.classList.remove('hidden');
 }
 
-// --- 4. Gesamtdosis ---
 function calculateTotalDose() {
-    const dosis = getInputValue('dosisleistung-total');
+    const dosisleistung = getInputValue('dosisleistung-total');
     const stunden = parseFloat(document.getElementById('stunden-total').value || 0);
     const minuten = parseFloat(document.getElementById('minuten-total').value || 0);
-    const sek = parseFloat(document.getElementById('sekunden-total').value || 0);
-    const res = document.getElementById('result-total-dose');
-    if(isNaN(dosis)||dosis<=0){res.classList.remove('hidden'); res.classList.add('error'); res.innerHTML='Dosisleistung muss >0 sein.'; return;}
-    const gesamt = stunden + minuten/60 + sek/3600;
-    const total = dosis*gesamt;
-    res.classList.remove('error');
-    res.innerHTML = `<div class="result-title">Aufgenommene Gesamtdosis:</div>
-                     <div class="result-value">${formatToGerman(total,3)} μSv</div>`;
-    res.classList.remove('hidden');
+    const sekunden = parseFloat(document.getElementById('sekunden-total').value || 0);
+    const resultBox = document.getElementById('result-total-dose');
+
+    if (isNaN(dosisleistung) || dosisleistung <=0) return;
+    const gesamtzeit = stunden + (minuten/60) + (sekunden/3600);
+    const totalDosis = dosisleistung * gesamtzeit;
+
+    resultBox.innerHTML = `<div class="result-title">Aufgenommene Gesamtdosis:</div><div class="result-value">${formatToGerman(totalDosis,3)} μSv</div>`;
+    resultBox.classList.remove('hidden');
 }
 
-// --- 5. TKZ ---
 function calculateTKZ() {
     const tkz = getInputValue('eingabe-tkz');
     const dl = getInputValue('eingabe-tkz-dl');
-    const res = document.getElementById('result-tkz');
-    if((isNaN(tkz)&&isNaN(dl))||(isNaN(tkz)&&dl<=0)||(isNaN(dl)&&tkz<=0)){res.classList.remove('hidden'); res.classList.add('error'); res.innerHTML='Mindestens ein Wert >0 erforderlich.'; return;}
-    let resultTKZ,resultDL;
-    if(!isNaN(dl)&&dl>0){resultDL=dl; resultTKZ=Math.ceil(dl*10)/10;}
-    else {resultTKZ=tkz; resultDL=tkz;}
-    res.classList.remove('error');
-    res.innerHTML = `<div class="result-title">Ergebnisse:</div>
-                     <p><strong>Dosisleistung (DL 1m):</strong> ${formatToGerman(resultDL,3)} μSv/h</p>
-                     <p><strong>Transportkennzahl (TKZ):</strong> ${formatToGerman(resultTKZ,1)}</p>`;
-    res.classList.remove('hidden');
+    const resultBox = document.getElementById('result-tkz');
+
+    let finalTKZ, finalDL;
+    if(!isNaN(dl) && dl>0){
+        finalDL = dl;
+        finalTKZ = Math.ceil(dl*10)/10;
+    } else if(!isNaN(tkz) && tkz>0){
+        finalTKZ = tkz;
+        finalDL = tkz;
+    } else {
+        resultBox.classList.add('error');
+        resultBox.innerHTML = 'Bitte mindestens ein Feld ausfüllen';
+        return;
+    }
+
+    resultBox.innerHTML = `<div class="result-title">Ergebnisse:</div>
+        <p><strong>Dosisleistung:</strong> ${formatToGerman(finalDL,3)} μSv/h</p>
+        <p><strong>Transportkennzahl (TKZ):</strong> ${formatToGerman(finalTKZ,1)}</p>`;
+    resultBox.classList.remove('hidden');
 }
 
-// --- 6. Aktivität ---
 function toggleManualGammaH() {
-    const sel = document.getElementById('dosisleistungskonstante-select');
-    const man = document.getElementById('dosisleistungskonstante-manuell');
-    if(sel.value==='manuell'){man.classList.remove('hidden'); man.value=''; man.focus();} 
-    else {man.classList.add('hidden');}
+    const select = document.getElementById('dosisleistungskonstante-select');
+    const manualInput = document.getElementById('dosisleistungskonstante-manuell');
+    if(select.value==='manuell') manualInput.classList.remove('hidden'); 
+    else manualInput.classList.add('hidden');
 }
 
 function convertActivityToMBq(value, unit){
-    switch(unit){case'Bq':return value/1000000;case'kBq':return value/1000;case'MBq':return value;case'GBq':return value*1000;default:return 0;}
+    switch(unit){
+        case 'Bq': return value/1000000;
+        case 'kBq': return value/1000;
+        case 'MBq': return value;
+        case 'GBq': return value*1000;
+        default: return 0;
+    }
 }
 
 function calculateAktivitaet(){
-    const A=getInputValue('aktivitaet-wert');
-    const unit=document.getElementById('aktivitaet-einheit').value;
-    const gammaSel=document.getElementById('dosisleistungskonstante-select').value;
-    const res=document.getElementById('result-aktivitaet');
-    const r=getInputValue('abstand-aktivitaet');
-    let gamma;
-    if(gammaSel==='manuell'){gamma=getInputValue('dosisleistungskonstante-manuell');} 
-    else {gamma=parseFloat(gammaSel);}
-    if(isNaN(A)||isNaN(gamma)||isNaN(r)||A<0||gamma<=0||r<=0){res.classList.remove('hidden'); res.classList.add('error'); res.innerHTML='Bitte alle Felder korrekt ausfüllen (>0 für GammaH und Abstand).'; return;}
-    const A_MBq=convertActivityToMBq(A,unit);
-    const dl=(A_MBq*gamma)/(r*r);
-    res.classList.remove('error');
-    res.innerHTML=`<div class="result-title">Berechnete Dosisleistung:</div>
-                   <div class="result-value">${formatToGerman(dl,3)} μSv/h</div>
-                   <div style="font-size:0.875rem; margin-top:0.25rem;">Verwendete Γ-Konstante: ${formatToGerman(gamma,5)} μSv·m²/h·MBq</div>`;
-    res.classList.remove('hidden');
+    const A_Value = getInputValue('aktivitaet-wert');
+    const A_Unit = document.getElementById('aktivitaet-einheit').value;
+    const resultBox = document.getElementById('result-aktivitaet');
+
+    if(isNaN(A_Value)){
+        resultBox.classList.add('error');
+        resultBox.innerHTML = 'Bitte einen gültigen Wert eingeben.';
+        return;
+    }
+
+    const mbq = convertActivityToMBq(A_Value,A_Unit);
+
+    resultBox.classList.remove('error');
+    resultBox.innerHTML = `<div class="result-title">Aktivität:</div><div class="result-value">${formatToGerman(mbq,3)} MBq</div>`;
+    resultBox.classList.remove('hidden');
 }
 
-// --- 7. Schutzwert ---
 function calculateSchutzwert(){
-    const ohne=getInputValue('dl-ohne-abschirmung');
-    const mit=getInputValue('dl-mit-abschirmung');
-    const res=document.getElementById('result-schutzwert');
-    if(isNaN(ohne)||isNaN(mit)||ohne<=0||mit<0){res.classList.remove('hidden'); res.classList.add('error'); res.innerHTML='Bitte alle Felder korrekt ausfüllen (>0 ohne Abschirmung).'; return;}
-    if(mit>=ohne){res.classList.remove('hidden'); res.classList.add('error'); res.innerHTML='Mit Abschirmung darf nicht größer als ohne sein.'; return;}
-    const sw=ohne/mit;
-    res.classList.remove('error');
-    res.innerHTML=`<div class="result-title">Schutzwert:</div>
-                   <div class="result-value">${formatToGerman(sw,2)}</div>`;
-    res.classList.remove('hidden');
+    const H = getInputValue('schutzwert-h');
+    const SW = getInputValue('schutzwert-sw');
+    const resultBox = document.getElementById('result-schutzwert');
+
+    if(isNaN(H) || isNaN(SW) || H<=0 || SW<=0){
+        resultBox.classList.add('error');
+        resultBox.innerHTML = 'Bitte gültige Werte eingeben.';
+        return;
+    }
+
+    const result = H / SW;
+
+    resultBox.classList.remove('error');
+    resultBox.innerHTML = `<div class="result-title">Ergebnis:</div><div class="result-value">${formatToGerman(result,3)}</div>`;
+    resultBox.classList.remove('hidden');
 }
-
-// --- BUTTON MAPPING ---
-const calcMap = {
-    'calc-distanz': calculateDistanz,
-    'calc-einheit': calculateEinheit,
-    'calc-dauer': calculateDauer,
-    'calc-total-dose': calculateTotalDose,
-    'calc-tkz': calculateTKZ,
-    'calc-aktivitaet': calculateAktivitaet,
-    'calc-schutzwert': calculateSchutzwert
-};
-
-for(const id in calcMap){
-    const btn=document.getElementById(id);
-    if(btn) btn.addEventListener('click', calcMap[id]);
-}
-
-// GammaH manuell toggle
-const gammaSel = document.getElementById('dosisleistungskonstante-select');
-if(gammaSel) gammaSel.addEventListener('change', toggleManualGammaH);
-
-// --- ZOOM PREVENTION FÜR MOBILE ---
-document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
-    input.style.fontSize='16px';
-});
