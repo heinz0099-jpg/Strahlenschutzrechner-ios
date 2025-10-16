@@ -1,51 +1,50 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4f46e5">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" href="icons/icon-192.png" type="image/png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Strahlenschutz-Rechner (Offline-Version)</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Strahlenschutz-Rechner</title>
+<style>
+/* (Hier kommt dein CSS wie in der Vorlage – Container, Cards, Buttons usw.) */
+</style>
 </head>
 <body>
-<div class="container">
-    <h1 class="header">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 mr-3">
-            <circle cx="50" cy="50" r="50" fill="#FFC72C" />
-            <path fill="#000000" d="M50 50 L50 16 A34 34 0 0 1 84.7 33.7 L72.8 40.5 A22 22 0 0 0 50 28 Z" transform="rotate(0 50 50)"/>
-            <path fill="#000000" d="M50 50 L50 16 A34 34 0 0 1 84.7 33.7 L72.8 40.5 A22 22 0 0 0 50 28 Z" transform="rotate(120 50 50)"/>
-            <path fill="#000000" d="M50 50 L50 16 A34 34 0 0 1 84.7 33.7 L72.8 40.5 A22 22 0 0 0 50 28 Z" transform="rotate(240 50 50)"/>
-            <circle cx="50" cy="50" r="10" fill="#000000"/>
-        </svg>
-        Strahlenschutz-Rechner
-    </h1>
 
-    <!-- Navigation -->
+<div class="container">
+    <!-- Header -->
+    <h1 class="header">Strahlenschutz-Rechner</h1>
+
+    <!-- Navigation Buttons -->
     <div class="nav-bar">
-        <button id="nav-distanz" onclick="showScreen('distanz')" class="nav-button active">Abstand</button>
-        <button id="nav-einheit" onclick="showScreen('einheit')" class="nav-button">Einheiten</button>
-        <button id="nav-dauer" onclick="showScreen('dauer')" class="nav-button">Dauer</button>
-        <button id="nav-total-dose" onclick="showScreen('total-dose')" class="nav-button">Gesamtdosis</button>
-        <button id="nav-tkz" onclick="showScreen('tkz')" class="nav-button">TKZ/DL</button>
-        <button id="nav-aktivitaet" onclick="showScreen('aktivitaet')" class="nav-button">Aktivität</button>
-        <button id="nav-schutzwert" onclick="showScreen('schutzwert')" class="nav-button">Schutzwert</button>
+        <button id="nav-distanz" class="nav-button active">Abstand</button>
+        <button id="nav-einheit" class="nav-button">Einheiten</button>
+        <button id="nav-dauer" class="nav-button">Dauer</button>
+        <button id="nav-total-dose" class="nav-button">Gesamtdosis</button>
+        <button id="nav-tkz" class="nav-button">TKZ/DL</button>
+        <button id="nav-aktivitaet" class="nav-button">Aktivität</button>
+        <button id="nav-schutzwert" class="nav-button">Schutzwert</button>
     </div>
 
-    <!-- Screens werden alle in app.js verwaltet -->
-    <div id="screens-container"></div>
-
-    <p class="text-center-sm">Alle Berechnungen sind Näherungen und dienen nur als Hilfsmittel.</p>
+    <!-- Screens / Berechnungen -->
+    <div id="screen-distanz" class="card"></div>
+    <div id="screen-einheit" class="card hidden"></div>
+    <div id="screen-dauer" class="card hidden"></div>
+    <div id="screen-total-dose" class="card hidden"></div>
+    <div id="screen-tkz" class="card hidden"></div>
+    <div id="screen-aktivitaet" class="card hidden"></div>
+    <div id="screen-schutzwert" class="card hidden"></div>
 </div>
 
 <script src="app.js"></script>
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker registriert'))
-    .catch(err => console.log('Service Worker Fehler:', err));
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("Service Worker registriert"))
+        .catch(err => console.log("Service Worker Fehler:", err));
 }
 </script>
 </body>
