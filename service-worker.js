@@ -3,6 +3,7 @@ const URLS_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./app.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png"
@@ -12,20 +13,18 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(URLS_TO_CACHE))
   );
-  self.skipWaiting(); // Aktiviert den neuen Service Worker sofort
+  self.skipWaiting(); // sofort aktivieren
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames
-          .filter(name => name !== CACHE_NAME)
-          .map(name => caches.delete(name))
-      );
-    })
+    caches.keys().then(cacheNames => 
+      Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+      )
+    )
   );
-  self.clients.claim(); // Macht den Service Worker sofort wirksam
+  self.clients.claim(); // sofort wirksam
 });
 
 self.addEventListener("fetch", event => {
