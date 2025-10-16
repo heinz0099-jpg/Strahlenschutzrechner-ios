@@ -2,15 +2,13 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-
-  <!-- iOS & Viewport optimiert -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Strahlenschutz-Rechner">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#FFD700">
-
   <title>Strahlenschutz-Rechner (Offline-Version)</title>
 
   <style>
@@ -23,30 +21,16 @@
       --color-red-light: #fecaca;
     }
 
-    html { font-size: 18px; }
-    body { font-family: 'Inter', sans-serif; margin:0; padding:0; background:#f7f9fc; }
-    input, select, textarea { font-size:16px; }
-
+    html { font-size:18px; }
+    body { font-family:'Inter',sans-serif; margin:0; padding:0; background:#f7f9fc; }
     #app { min-height:100vh; padding:1rem; box-sizing:border-box; }
 
     .container { max-width:480px; margin:auto; padding:1rem; }
     .card { background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.06); margin-bottom:1.5rem; }
     .hidden { display:none; }
 
-    .header { font-size:1.875rem; font-weight:700; text-align:center; margin-bottom:1.5rem; color:#1f2937; display:flex; align-items:center; justify-content:center; }
-    .header svg { width:2rem; height:2rem; margin-right:0.75rem; }
     .subheader { font-size:1.25rem; font-weight:600; margin-bottom:1rem; color: var(--color-indigo-dark); }
     .text-info { font-size:0.875rem; color:#4b5563; margin-bottom:1rem; min-height:2.5rem; }
-
-    .nav-bar { display:flex; flex-wrap:wrap; justify-content:space-around; gap:0.2rem; margin-bottom:1.5rem; padding:0.5rem; background-color: var(--color-indigo); border-radius:0.5rem; box-shadow:0 4px 6px rgba(0,0,0,0.1); }
-    .nav-button { flex-grow:1; padding:0.5rem; font-size:0.75rem; font-weight:600; color:white; border-radius:0.5rem; transition:background-color 0.15s, opacity 0.15s; border:none; cursor:pointer; min-width:30%; background-color: var(--color-indigo); opacity:0.75; margin:0.2rem; }
-    .nav-button:hover { opacity:1; }
-    .nav-button.active { background-color: var(--color-indigo-dark); opacity:1; }
-
-    .form-group { margin-bottom:1rem; }
-    .form-label { display:block; font-size:0.875rem; font-weight:500; color:#374151; }
-    input[type="text"], input[type="number"], select { border:1px solid #d1d5db; padding:0.75rem; border-radius:8px; width:100%; margin-top:0.25rem; transition:border-color 0.15s ease-in-out; box-sizing:border-box; }
-    input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color:#3b82f6; outline:none; box-shadow:0 0 0 3px rgba(59,130,246,0.5); }
 
     .main-button { width:100%; padding:0.75rem; background-color: var(--color-indigo); color:white; font-weight:700; border-radius:0.5rem; transition:background-color 0.15s; box-shadow:0 4px 6px rgba(0,0,0,0.1); border:none; cursor:pointer; margin-top:1rem; }
     .main-button:hover { background-color: var(--color-indigo-dark); }
@@ -55,17 +39,10 @@
     .result-box.error { background-color: var(--color-red-light); border-color: var(--color-red-error); color: var(--color-red-error); }
     .result-title { font-weight:700; font-size:1.125rem; }
     .result-value { font-size:1.5rem; margin-top:0.25rem; }
-
-    .flex-row { display:flex; gap:0.5rem; }
-    .flex-col { display:flex; flex-direction:column; gap:1rem; }
-    .flex-item { flex:1 1 0%; }
-    .text-center-sm { font-size:0.75rem; text-align:center; color:#6b7280; margin-top:1rem; padding:0.5rem; }
   </style>
 </head>
 <body>
-  <div id="app">
-    <!-- Dein ursprünglicher App-Inhalt bleibt hier unverändert -->
-  </div>
+  <div id="app" class="container"></div>
 
   <!-- Service Worker Registrierung -->
   <script>
@@ -78,7 +55,6 @@
     }
   </script>
 
-  <!-- Dein JS -->
   <script src="app.js" defer></script>
 </body>
 </html>
