@@ -2,13 +2,13 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  
+
   <!-- iOS & Viewport optimiert -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Strahlenschutz-Rechner">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="theme-color" content="#FFD700">
 
   <title>Strahlenschutz-Rechner (Offline-Version)</title>
@@ -23,11 +23,10 @@
       --color-red-light: #fecaca;
     }
 
-    html { font-size: 18px; } /* Basisfont für iOS */
+    html { font-size: 18px; }
     body { font-family: 'Inter', sans-serif; margin:0; padding:0; background:#f7f9fc; }
     input, select, textarea { font-size:16px; }
 
-    /* Container für Fullscreen */
     #app { min-height:100vh; padding:1rem; box-sizing:border-box; }
 
     .container { max-width:480px; margin:auto; padding:1rem; }
@@ -65,16 +64,16 @@
 </head>
 <body>
   <div id="app">
-    <!-- Dein PWA-Inhalt hier -->
+    <!-- Dein ursprünglicher App-Inhalt bleibt hier unverändert -->
   </div>
 
   <!-- Service Worker Registrierung -->
   <script>
-    if('serviceWorker' in navigator){
-      window.addEventListener('load', ()=>{
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg=>console.log('Service Worker registriert:', reg.scope))
-          .catch(err=>console.error('Service Worker Fehler:', err));
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('Service Worker registriert:', reg.scope))
+          .catch(err => console.error('Service Worker Fehler:', err));
       });
     }
   </script>
