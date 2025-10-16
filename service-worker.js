@@ -1,50 +1,6 @@
-const CACHE_NAME = 'strahlenschutz-rechner-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/style.css',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
-];
+const CACHE_NAME="strahlenschutz-cache-v1";
+const URLS_TO_CACHE=["./","./index.html","./manifest.webmanifest","./icons/icon-192.png","./icons/icon-512.png","./icons/apple-touch-icon.png"];
 
-// Install & Cache
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE))
-  );
-  self.skipWaiting();
-});
-
-// Activate & Clean Old Caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => 
-      Promise.all(keys.map(key => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      }))
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch: Cache First, then Network
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request)
-        .then(response => {
-          // Cache new files dynamically
-          return caches.open(CACHE_NAME).then(cache => {
-            if(event.request.method === 'GET') cache.put(event.request, response.clone());
-            return response;
-          });
-        })
-        .catch(() => {
-          // Optional: Offline Fallback Page
-          if(event.request.destination === 'document') return caches.match('/index.html');
-        });
-    })
-  );
-});
+self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(URLS_TO_CACHE)))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(names=>Promise.all(names.filter(n=>n!==CACHE_NAME).map(n=>caches.delete(n)))))});
+self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});
