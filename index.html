@@ -1,107 +1,140 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Strahlenschutz-Rechner</title>
-<link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Strahlenschutz-Rechner (Offline-Version)</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-    <h1>Strahlenschutz-Rechner</h1>
-</header>
 
-<nav>
-    <button id="nav-distanz">Quadratisches Abstandsgesetz</button>
-    <button id="nav-einheit">Einheitenumrechner</button>
-    <button id="nav-dauer">Maximale Aufenthaltsdauer</button>
-    <button id="nav-total-dose">Gesamtdosis</button>
-    <button id="nav-tkz">TKZ</button>
-    <button id="nav-aktivitaet">Aktivität</button>
-    <button id="nav-schutzwert">Schutzwert</button>
-</nav>
+<div class="container">
+    <h1 class="header">
+        Strahlenschutz-Rechner
+    </h1>
 
-<main>
+    <div class="nav-bar">
+        <button id="nav-distanz" class="nav-button active">Abstand</button>
+        <button id="nav-einheit" class="nav-button">Einheiten</button>
+        <button id="nav-dauer" class="nav-button">Dauer</button>
+        <button id="nav-total-dose" class="nav-button">Gesamtdosis</button>
+        <button id="nav-tkz" class="nav-button">TKZ/DL</button>
+        <button id="nav-aktivitaet" class="nav-button">Aktivität</button>
+        <button id="nav-schutzwert" class="nav-button">Schutzwert</button>
+    </div>
+
     <!-- 1. Quadratisches Abstandsgesetz -->
-    <section id="screen-distanz">
-        <h2>Quadratisches Abstandsgesetz</h2>
-        <label>Dosisleistung H1 (μSv/h): <input type="number" id="dosisleistung1" placeholder="z.B. 50"></label>
-        <label>Abstand R1 (m): <input type="number" id="abstand1" placeholder="z.B. 1"></label>
-        <label>Abstand R2 (m): <input type="number" id="abstand2" placeholder="z.B. 2"></label>
-        <button onclick="calculateDistanz()">Berechnen</button>
-        <div id="result-distanz" class="result hidden"></div>
-    </section>
+    <div id="screen-distanz" class="card">
+        <h2 class="subheader">1. Quadratisches Abstandsgesetz</h2>
+        <p class="text-info">Berechnet die neue Dosisleistung (H2) in μSv/h bei einem neuen Abstand (r2).</p>
+        <div class="flex-col">
+            <input type="text" id="dosisleistung1" value="100" placeholder="H1 in μSv/h">
+            <input type="text" id="abstand1" placeholder="r1 in m">
+            <input type="text" id="abstand2" placeholder="r2 in m">
+            <button onclick="calculateDistanz()" class="main-button">Berechnen</button>
+            <div id="result-distanz" class="result-box hidden"></div>
+        </div>
+    </div>
 
-    <!-- 2. Einheitenumrechner -->
-    <section id="screen-einheit" class="hidden">
-        <h2>Einheitenumrechner</h2>
-        <label>Wert: <input type="number" id="wert-einheit" placeholder="z.B. 50"></label>
-        <label>Einheit:
+    <!-- 2. Dosisleistungs-Umrechner -->
+    <div id="screen-einheit" class="card hidden">
+        <h2 class="subheader">2. Dosisleistungs-Umrechner</h2>
+        <div class="flex-col">
+            <input type="text" id="wert-einheit" value="100" placeholder="Wert">
             <select id="einheit-quelle">
                 <option value="micro">μSv/h</option>
                 <option value="milli">mSv/h</option>
                 <option value="sievert">Sv/h</option>
             </select>
-        </label>
-        <button onclick="calculateEinheit()">Berechnen</button>
-        <div id="result-einheit" class="result hidden"></div>
-    </section>
+            <button onclick="calculateEinheit()" class="main-button">Umrechnen</button>
+            <div id="result-einheit" class="result-box hidden"></div>
+        </div>
+    </div>
 
     <!-- 3. Maximale Aufenthaltsdauer -->
-    <section id="screen-dauer" class="hidden">
-        <h2>Maximale Aufenthaltsdauer</h2>
-        <label>Dosisleistung (μSv/h): <input type="number" id="dosisleistung-dauer" placeholder="z.B. 50"></label>
-        <label>Zieldosis (μSv): <input type="number" id="zieldosis-dauer" placeholder="z.B. 100"></label>
-        <button onclick="calculateDauer()">Berechnen</button>
-        <div id="result-dauer" class="result hidden"></div>
-    </section>
+    <div id="screen-dauer" class="card hidden">
+        <h2 class="subheader">3. Maximale Aufenthaltsdauer</h2>
+        <div class="flex-col">
+            <input type="text" id="dosisleistung-dauer" value="50" placeholder="Dosisleistung μSv/h">
+            <input type="text" id="zieldosis-dauer" value="200" placeholder="Zieldosis μSv">
+            <button onclick="calculateDauer()" class="main-button">Berechnen</button>
+            <div id="result-dauer" class="result-box hidden"></div>
+        </div>
+    </div>
 
-    <!-- 4. Gesamtdosis -->
-    <section id="screen-total-dose" class="hidden">
-        <h2>Gesamtdosis</h2>
-        <label>Dosisleistung (μSv/h): <input type="number" id="dosisleistung-total" placeholder="z.B. 50"></label>
-        <label>Stunden: <input type="number" id="stunden-total" placeholder="z.B. 2"></label>
-        <label>Minuten: <input type="number" id="minuten-total" placeholder="z.B. 30"></label>
-        <label>Sekunden: <input type="number" id="sekunden-total" placeholder="z.B. 0"></label>
-        <button onclick="calculateTotalDose()">Berechnen</button>
-        <div id="result-total-dose" class="result hidden"></div>
-    </section>
+    <!-- 4. Aufgenommene Gesamtdosis -->
+    <div id="screen-total-dose" class="card hidden">
+        <h2 class="subheader">4. Aufgenommene Gesamtdosis</h2>
+        <div class="flex-col">
+            <input type="text" id="dosisleistung-total" value="100" placeholder="Dosisleistung μSv/h">
+            <input type="number" id="stunden-total" value="0" min="0">
+            <input type="number" id="minuten-total" value="30" min="0" max="59">
+            <input type="number" id="sekunden-total" value="0" min="0" max="59">
+            <button onclick="calculateTotalDose()" class="main-button">Berechnen</button>
+            <div id="result-total-dose" class="result-box hidden"></div>
+        </div>
+    </div>
 
-    <!-- 5. TKZ -->
-    <section id="screen-tkz" class="hidden">
-        <h2>Transportkennzahl (TKZ)</h2>
-        <label>Dosisleistung (μSv/h): <input type="number" id="eingabe-tkz-dl" placeholder="z.B. 50"></label>
-        <label>Transportkennzahl: <input type="number" id="eingabe-tkz" placeholder="z.B. 5"></label>
-        <button onclick="calculateTKZ()">Berechnen</button>
-        <div id="result-tkz" class="result hidden"></div>
-    </section>
+    <!-- 5. Transportkennzahl -->
+    <div id="screen-tkz" class="card hidden">
+        <h2 class="subheader">5. Transportkennzahl</h2>
+        <div class="flex-col">
+            <input type="text" id="eingabe-tkz" placeholder="TKZ">
+            <input type="text" id="eingabe-tkz-dl" placeholder="Dosisleistung μSv/h">
+            <button onclick="calculateTKZ()" class="main-button">Berechnen</button>
+            <div id="result-tkz" class="result-box hidden"></div>
+        </div>
+    </div>
 
-    <!-- 6. Aktivität -->
-    <section id="screen-aktivitaet" class="hidden">
-        <h2>Aktivität</h2>
-        <label>Wert: <input type="number" id="aktivitaet" placeholder="z.B. 50"></label>
-        <label>Einheit:
-            <select id="aktivitaet-unit">
+    <!-- 6. Aktivität nach Dosisleistung -->
+    <div id="screen-aktivitaet" class="card hidden">
+        <h2 class="subheader">6. Aktivität nach Dosisleistung</h2>
+        <div class="flex-col">
+            <input type="text" id="aktivitaet-wert" value="5" placeholder="Aktivität">
+            <select id="aktivitaet-einheit">
                 <option value="Bq">Bq</option>
                 <option value="kBq">kBq</option>
-                <option value="MBq">MBq</option>
+                <option value="MBq" selected>MBq</option>
                 <option value="GBq">GBq</option>
             </select>
-        </label>
-        <button onclick="calculateAktivitaet()">Berechnen</button>
-        <div id="result-aktivitaet" class="result hidden"></div>
-    </section>
+            <select id="dosisleistungskonstante-select">
+                <option value="0.0883" selected>Cs-137</option>
+                <option value="0.35">Co-60</option>
+                <option value="0.13">Ir-192</option>
+                <option value="0.004">Am-241</option>
+                <option value="manuell">Manuell</option>
+            </select>
+            <input type="text" id="dosisleistungskonstante-manuell" class="hidden" placeholder="Manuell">
+            <input type="text" id="abstand-aktivitaet" value="1" placeholder="Abstand in m">
+            <button onclick="calculateAktivitaet()" class="main-button">Berechnen</button>
+            <div id="result-aktivitaet" class="result-box hidden"></div>
+        </div>
+    </div>
 
-    <!-- 7. Schutzwert -->
-    <section id="screen-schutzwert" class="hidden">
-        <h2>Schutzwert</h2>
-        <label>Ohne Schutz (μSv/h): <input type="number" id="ohne-schutz" placeholder="z.B. 50"></label>
-        <label>Mit Schutz (μSv/h): <input type="number" id="mit-schutz" placeholder="z.B. 10"></label>
-        <button onclick="calculateSchutzwert()">Berechnen</button>
-        <div id="result-schutzwert" class="result hidden"></div>
-    </section>
-</main>
+    <!-- 7. Abschirmung/Schutzwert -->
+    <div id="screen-schutzwert" class="card hidden">
+        <h2 class="subheader">7. Abschirmung/Schutzwert</h2>
+        <div class="flex-col">
+            <input type="text" id="dl-ohne-abschirmung" value="300" placeholder="Dosisleistung OHNE">
+            <input type="text" id="dl-mit-abschirmung" value="120" placeholder="Dosisleistung MIT">
+            <button onclick="calculateSchutzwert()" class="main-button">Berechnen</button>
+            <div id="result-schutzwert" class="result-box hidden"></div>
+        </div>
+    </div>
+
+</div>
 
 <script src="app.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("Service Worker registriert"))
+      .catch(err => console.log("Service Worker Fehler:", err));
+  }
+</script>
 </body>
 </html>
