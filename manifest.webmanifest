@@ -1,60 +1,27 @@
 {
   "name": "Strahlenschutz-Rechner",
-  "short_name": "Strahlenschutz",
-  "description": "Offlinefähiger Strahlenschutz-Rechner für iOS und Android",
-  "start_url": "/index.html",
+  "short_name": "Strahlenrechner",
+  "description": "Offline-Rechner für Strahlenschutz-Parameter wie Dosisleistung, Dauer und Schutzwert.",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f7f9fc",
   "theme_color": "#4f46e5",
-  "orientation": "portrait",
   "icons": [
-    {
-      "src": "icons/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "icons/icon-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ],
-  "apple": {
-    "status_bar": "default",
-    "touch_icon": "icons/icon-192.png",
-    "splash": {
-      "src": "icons/splash.png",
-      "sizes": "2048x2732"
-    }
-  }
+  ]
 }
