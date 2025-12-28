@@ -8,6 +8,7 @@ const urlsToCache = [
   'index.html', // Oder der Name Ihrer HTML-Datei
   'manifest.webmanifest',
   'icons/icon-192.png',
+  'ADR_Info.pdf',
   // Fügen Sie hier alle weiteren Icons hinzu, die in der Manifest-Datei genannt sind
   'icons/icon-512.png', 
   'icons/icon-maskable.png'
