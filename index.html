@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4f46e5">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icons/icon-192.png" type="image/png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta charset="UTF-8">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
-    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Strahlenschutz-Rechner (Offline-Version)</title>
     <style>
         /* BASE STYLES */
@@ -109,6 +104,11 @@
             background-color: var(--color-indigo);
             opacity: 0.75;
             margin: 0.2rem; /* Hinzugefügter Rand für bessere Touch-Erkennung */
+            /* Damit A-Tags wie Buttons aussehen */
+            text-decoration: none; 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
         }
         .nav-button:hover {
             opacity: 1;
@@ -245,6 +245,7 @@
         <button id="nav-tkz" onclick="showScreen('tkz')" class="nav-button">TKZ/DL</button>
         <button id="nav-aktivitaet" onclick="showScreen('aktivitaet')" class="nav-button">Aktivität</button>
         <button id="nav-schutzwert" onclick="showScreen('schutzwert')" class="nav-button">Schutzwert</button>
+        <a href="ADR_Info.pdf" target="_blank" id="nav-ADR-Info" class="nav-button">ADR-Info</a>
     </div>
 
     <div id="screen-distanz" class="card">
@@ -491,7 +492,7 @@
         'einheit': document.getElementById('screen-einheit'),
         'dauer': document.getElementById('screen-dauer'),
         'total-dose': document.getElementById('screen-total-dose'),
-        'tkz': document.getElementById('screen-tkz'),          
+        'tkz': document.getElementById('screen-tkz'),         
         'aktivitaet': document.getElementById('screen-aktivitaet'), 
         'schutzwert': document.getElementById('screen-schutzwert') 
     };
@@ -504,6 +505,7 @@
         'tkz': document.getElementById('nav-tkz'),           
         'aktivitaet': document.getElementById('nav-aktivitaet'), 
         'schutzwert': document.getElementById('nav-schutzwert') 
+        // nav-ADR-Info ist jetzt ein direkter Link und wird nicht mehr über showScreen() verwaltet.
     };
 
     /**
@@ -528,6 +530,12 @@
                     navButtons[id].classList.remove('active');
                 }
             }
+        }
+        
+        // Stellt sicher, dass der ADR-Link nicht die aktive Klasse hat, wenn ein Rechner ausgewählt wird
+        const adrLink = document.getElementById('nav-ADR-Info');
+        if (adrLink) {
+            adrLink.classList.remove('active');
         }
     }
 
@@ -784,43 +792,44 @@
         resultBox.innerHTML = `
             <div class="result-title">Berechnete Dosisleistung:</div>
             <div class="result-value">${dlFormatted} μSv/h</div>
-            <div style="font-size: 0.875rem; margin-top: 0.25rem; color: #374151;">(Mit Gamma-H = ${gammaHFormatted} μSv·m²/h·MBq)</div>
+            <div style="font-size: 0.875rem; margin-top: 0.25rem; color: #374151;">
+                Verwendete Gamma-Konstante: ${gammaHFormatted} μSv·m²/h·MBq.
+            </div>
         `;
         resultBox.classList.remove('hidden');
     }
-
+    
     // --- 7. Abschirmung/Schutzwert ---
     function calculateSchutzwert() {
-        // HINWEIS: Sie haben das Berechnungsskript für den Schutzwert im Originalcode abgeschnitten.
-        // Ich füge es basierend auf Ihrer Formel S = H(ohne) / H(mit) hier ein.
-        const dlOhne = getInputValue('dl-ohne-abschirmung');
-        const dlMit = getInputValue('dl-mit-abschirmung');
+        const dl0 = getInputValue('dl-ohne-abschirmung');
+        const dlx = getInputValue('dl-mit-abschirmung');
         const resultBox = document.getElementById('result-schutzwert');
 
-        if (isNaN(dlOhne) || isNaN(dlMit) || dlOhne <= 0 || dlMit <= 0) {
+        if (isNaN(dl0) || isNaN(dlx) || dl0 <= 0 || dlx < 0) {
             resultBox.classList.remove('hidden');
             resultBox.classList.add('error');
-            resultBox.innerHTML = 'Bitte alle Felder mit gültigen Werten (> 0) ausfüllen.';
+            resultBox.innerHTML = 'Bitte alle Felder mit gültigen Werten (> 0 für Dosisleistung OHNE Abschirmung) ausfüllen.';
             return;
         }
-
-        if (dlMit > dlOhne) {
+        
+        if (dlx === 0) {
+            resultBox.classList.remove('error');
+            resultBox.innerHTML = `
+                <div class="result-title">Schutzwert (S):</div>
+                <div class="result-value">> 1000</div>
+                <div style="font-size: 0.875rem; margin-top: 0.25rem; color: #374151;">(Messwert mit Abschirmung ist Null)</div>
+            `;
             resultBox.classList.remove('hidden');
-            resultBox.classList.add('error');
-            resultBox.innerHTML = 'Fehler: Dosisleistung MIT Abschirmung kann nicht höher sein als OHNE.';
             return;
         }
+        
+        const schutzwert = dl0 / dlx;
+        const schutzwertFormatted = formatToGerman(schutzwert, 3);
 
         resultBox.classList.remove('error');
-        const schutzwert = dlOhne / dlMit;
-        const schutzwertFormatted = formatToGerman(schutzwert, 3);
-        const reduktion = (1 - (1 / schutzwert)) * 100;
-        const reduktionFormatted = formatToGerman(reduktion, 1);
-
         resultBox.innerHTML = `
             <div class="result-title">Schutzwert (S):</div>
             <div class="result-value">${schutzwertFormatted}</div>
-            <div style="font-size: 0.875rem; margin-top: 0.25rem; color: #374151;">(Reduktion der Dosisleistung: ${reduktionFormatted}%)</div>
         `;
         resultBox.classList.remove('hidden');
     }
